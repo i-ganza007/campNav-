@@ -60,7 +60,7 @@ export default function Home() {
 
         <section className="flex flex-col justify-center items-center flex-1 px-8 text-center">
           <div className="mb-8">
-            <h1 className="text-8xl md:text-9xl font-bold text-white mb-4">loc.</h1>
+            <h1 className="text-8xl md:text-9xl font-bold text-white mb-4">findIT</h1>
             <div className="h-1 w-32 bg-[#ff0088] mx-auto"></div>
           </div>
           
