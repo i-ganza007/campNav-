@@ -159,13 +159,21 @@ export default function Browse() {
                 className="bg-white border-[#ff0088] border-2 hover:shadow-2xl transition-all hover:scale-105 flex flex-col"
               >
                 <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
-                  <Image
-                    src={camp.imageUrl}
-                    alt={camp.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
+                  {camp.imageUrl.startsWith('data:') ? (
+                    <img
+                      src={camp.imageUrl}
+                      alt={camp.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={camp.imageUrl}
+                      alt={camp.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  )}
                   <div className="absolute top-3 right-3 bg-[#ff0088] text-white px-3 py-1 rounded-full text-sm font-bold">
                     {camp.category}
                   </div>
@@ -205,9 +213,11 @@ export default function Browse() {
                   <div className="text-2xl font-bold text-[#ff0088]">
                     ${camp.price.toFixed(2)}
                   </div>
-                  <Button size="lg" className="text-lg">
-                    Learn More
-                  </Button>
+                  <Link href={`/camp/${camp.id}`}>
+                    <Button size="lg" className="text-lg">
+                      Learn More
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ))}

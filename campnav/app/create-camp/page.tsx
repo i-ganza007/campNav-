@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function CreateCamp() {
   const router = useRouter()
@@ -27,7 +28,36 @@ export default function CreateCamp() {
     capacity: "",
   })
 
+  const [imagePreview, setImagePreview] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size should be less than 5MB")
+        return
+      }
+
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please upload an image file")
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result as string
+        setImagePreview(base64String)
+        setFormData((prev) => ({
+          ...prev,
+          imageUrl: base64String,
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +90,7 @@ export default function CreateCamp() {
         ageRange: "",
         capacity: "",
       })
+      setImagePreview("")
 
       // Redirect to browse page
       router.push("/browse")
@@ -258,17 +289,61 @@ export default function CreateCamp() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="imageUpload" className="text-xl text-[#001220]">
+                  Upload Camp Image
+                </Label>
+                <div className="space-y-4">
+                  <Input
+                    id="imageUpload"
+                    name="imageUpload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="text-lg cursor-pointer"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Upload an image (max 5MB) or enter a URL below
+                  </p>
+                  
+                  {imagePreview && (
+                    <div className="relative h-48 w-full rounded-lg overflow-hidden border-2 border-[#ff0088]">
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setImagePreview("")
+                          setFormData((prev) => ({ ...prev, imageUrl: "" }))
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="imageUrl" className="text-xl text-[#001220]">
-                  Image URL (optional)
+                  Or Enter Image URL
                 </Label>
                 <Input
                   id="imageUrl"
                   name="imageUrl"
                   type="url"
-                  value={formData.imageUrl}
+                  value={imagePreview ? "" : formData.imageUrl}
                   onChange={handleChange}
                   placeholder="https://example.com/camp-image.jpg"
                   className="text-lg"
+                  disabled={!!imagePreview}
                 />
                 <p className="text-sm text-gray-500">
                   Leave blank to use a default image
