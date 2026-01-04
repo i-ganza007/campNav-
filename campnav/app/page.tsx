@@ -81,7 +81,7 @@ export default function Home() {
                 Browse Camps
               </Link>
               <Link 
-                href="/create" 
+                href="/create-camp" 
                 className="bg-white text-[#001220] px-10 py-4 rounded-full text-2xl hover:bg-gray-100 transition-colors shadow-lg"
               >
                 Create a Camp

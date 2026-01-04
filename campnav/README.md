@@ -1,4 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CampNav - Summer Camp Management App
+
+A Next.js application for creating and browsing summer camps using Zustand for state management.
+
+## Features
+
+- **Browse Camps**: View all available camps with filtering and search capabilities
+- **Create Camps**: Add new camps with detailed information including:
+  - Camp name and description
+  - Location and dates
+  - Price and capacity
+  - Age range and category
+  - Optional image URL
+- **Filter & Search**: 
+  - Search by camp name or description
+  - Filter by category (Adventure, Sports, Arts, STEM, etc.)
+  - Filter by location
+- **Persistent Storage**: All camps are stored using Zustand with persistence
+
+## Tech Stack
+
+- **Next.js 16** - React framework
+- **TypeScript** - Type safety
+- **Zustand** - State management with persistence
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - UI components
 
 ## Getting Started
 
@@ -16,9 +41,62 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+campnav/
+├── app/
+│   ├── page.tsx              # Homepage
+│   ├── browse/
+│   │   └── page.tsx          # Browse camps page
+│   ├── create-camp/
+│   │   └── page.tsx          # Create camp form
+│   └── layout.tsx
+├── components/
+│   └── ui/                   # Reusable UI components
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       └── textarea.tsx
+├── store/
+│   └── store.ts              # Zustand store with camp management
+└── lib/
+    └── utils.ts
+```
+
+## Usage
+
+### Creating a Camp
+
+1. Navigate to the "Create a Camp" page
+2. Fill in all required fields:
+   - Camp name
+   - Description
+   - Location
+   - Category
+   - Start and end dates
+   - Price and capacity
+   - Age range
+3. Optionally add an image URL
+4. Click "Create Camp" to save
+
+### Browsing Camps
+
+1. Navigate to the "Browse Camps" page
+2. Use the search bar to find camps by name or description
+3. Filter by category using the category buttons
+4. Filter by location using the location input
+5. Click "Clear All Filters" to reset
+
+## State Management
+
+The app uses Zustand for state management with the following features:
+
+- **Add Camp**: Create new camps with auto-generated IDs
+- **Get Camps**: Retrieve all camps
+- **Filter Camps**: Filter by category, location, price range, or search term
+- **Persistence**: All data is persisted to localStorage
 
 ## Learn More
 
