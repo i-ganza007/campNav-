@@ -241,7 +241,7 @@ export default function CreateCamp() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="price" className="text-xl text-[#001220]">
-                    Price ($) *
+                    Price (Rwf) *
                   </Label>
                   <Input
                     id="price"
