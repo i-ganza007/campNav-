@@ -31,10 +31,9 @@ interface CampStore {
   deleteCamp: (id: string) => void
 }
 
-export const useCampStore = create<CampStore>()(
   persist(
-    (set: any, get: any) => ({
-      camps: [],
+    (set, get) => ({
+      camps: [] as Camp[],
       addCamp: (camp: Omit<Camp, 'id' | 'createdAt'>) => {
         const newCamp: Camp = {
           ...camp,
