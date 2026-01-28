@@ -30,12 +30,20 @@ export default function Browse() {
   ]
 
   const filteredCamps = useMemo(() => {
-    return filterCamps({
-      category: selectedCategory,
-      location: locationFilter,
-      searchTerm: searchTerm,
+    return camps.filter((camp) => {
+      const matchesCategory =
+        selectedCategory === "all" || camp.category === selectedCategory
+
+      const matchesSearch =
+        camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        camp.description.toLowerCase().includes(searchTerm.toLowerCase())
+
+      const matchesLocation =
+        camp.location.toLowerCase().includes(locationFilter.toLowerCase())
+
+      return matchesCategory && matchesSearch && matchesLocation
     })
-  }, [searchTerm, selectedCategory, locationFilter, filterCamps])
+  }, [camps, searchTerm, selectedCategory, locationFilter])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
