@@ -31,59 +31,53 @@ interface CampStore {
   deleteCamp: (id: string) => void
 }
 
-  persist(
+export const useCampStore = create<CampStore>()(
+  persist<CampStore>(
     (set, get) => ({
       camps: [] as Camp[],
-      addCamp: (camp: Omit<Camp, 'id' | 'createdAt'>) => {
+      addCamp: (camp) => {
         const newCamp: Camp = {
           ...camp,
           id: crypto.randomUUID(),
           createdAt: new Date().toISOString(),
         }
-        set((state: CampStore) => ({
+        set((state) => ({
           camps: [...state.camps, newCamp],
         }))
       },
       getCamps: () => get().camps,
-      getCampById: (id: string) => get().camps.find((camp: Camp) => camp.id === id),
-      filterCamps: (filters: {
-        category?: string
-        location?: string
-        minPrice?: number
-        maxPrice?: number
-        searchTerm?: string
-      }) => {
+      getCampById: (id) => get().camps.find((camp) => camp.id === id),
+      filterCamps: (filters) => {
         const { category, location, minPrice, maxPrice, searchTerm } = filters
         let filtered = get().camps
         if (category && category !== 'all') {
-          filtered = filtered.filter((camp: Camp) => 
+          filtered = filtered.filter((camp) => 
             camp.category.toLowerCase() === category.toLowerCase()
           )
         }
         if (location) {
-          filtered = filtered.filter((camp: Camp) =>
+          filtered = filtered.filter((camp) =>
             camp.location.toLowerCase().includes(location.toLowerCase())
           )
         }
         if (minPrice !== undefined) {
-          filtered = filtered.filter((camp: Camp) => camp.price >= minPrice)
+          filtered = filtered.filter((camp) => camp.price >= minPrice)
         }
         if (maxPrice !== undefined) {
-          filtered = filtered.filter((camp: Camp) => camp.price <= maxPrice)
+          filtered = filtered.filter((camp) => camp.price <= maxPrice)
         }
         if (searchTerm) {
-          filtered = filtered.filter((camp: Camp) =>
+          filtered = filtered.filter((camp) =>
             camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             camp.description.toLowerCase().includes(searchTerm.toLowerCase())
           )
         }
         return filtered
       },
-      deleteCamp: (id: string) => {
-        set((state: CampStore) => ({
-          camps: state.camps.filter((camp: Camp) => camp.id !== id),
-        }))
-      },
+      deleteCamp: (id: string) =>
+        set((state) => ({
+          camps: state.camps.filter((camp) => camp.id !== id),
+        })),
     }),
     {
       name: 'camp-storage',
