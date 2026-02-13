@@ -10,6 +10,7 @@ import Image from "next/image"
 
 export default function Browse() {
   const camps = useCampStore((state) => state.camps)
+  const deleteCamp = useCampStore((state) => state.deleteCamp)
   const filterCamps = useCampStore((state) => state.filterCamps)
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -267,11 +268,16 @@ export default function Browse() {
                   <div className="text-2xl font-bold text-[#ff0088]">
                     {camp.price.toLocaleString()} Rwf
                   </div>
-                  <Link href={`/camp/${camp.id}`}>
-                    <Button size="lg" className="text-lg">
-                      Learn More
+                  <div className="flex gap-2">
+                    <Link href={`/camp/${camp.id}`}>
+                      <Button size="lg" className="text-lg">
+                        Learn More
+                      </Button>
+                    </Link>
+                    <Button size="lg" className="text-lg" variant="destructive" onClick={() => deleteCamp(camp.id)}>
+                      Delete
                     </Button>
-                  </Link>
+                  </div>
                 </CardFooter>
               </Card>
             ))}

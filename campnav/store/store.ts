@@ -116,13 +116,13 @@ interface CampStore {
     maxPrice?: number
     searchTerm?: string
   }) => Camp[]
+  deleteCamp: (id: string) => void
 }
 
 export const useCampStore = create<CampStore>()(
-  persist(
+  persist<CampStore>(
     (set, get) => ({
-      camps: [],
-      
+      camps: [] as Camp[],
       addCamp: (camp) => {
         const newCamp: Camp = {
           ...camp,
@@ -133,44 +133,39 @@ export const useCampStore = create<CampStore>()(
           camps: [...state.camps, newCamp],
         }))
       },
-      
       getCamps: () => get().camps,
-      
       getCampById: (id) => get().camps.find((camp) => camp.id === id),
-      
       filterCamps: (filters) => {
         const { category, location, minPrice, maxPrice, searchTerm } = filters
         let filtered = get().camps
-        
         if (category && category !== 'all') {
           filtered = filtered.filter((camp) => 
             camp.category.toLowerCase() === category.toLowerCase()
           )
         }
-        
         if (location) {
           filtered = filtered.filter((camp) =>
             camp.location.toLowerCase().includes(location.toLowerCase())
           )
         }
-        
         if (minPrice !== undefined) {
           filtered = filtered.filter((camp) => camp.price >= minPrice)
         }
-        
         if (maxPrice !== undefined) {
           filtered = filtered.filter((camp) => camp.price <= maxPrice)
         }
-        
         if (searchTerm) {
           filtered = filtered.filter((camp) =>
             camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             camp.description.toLowerCase().includes(searchTerm.toLowerCase())
           )
         }
-        
         return filtered
       },
+      deleteCamp: (id: string) =>
+        set((state) => ({
+          camps: state.camps.filter((camp) => camp.id !== id),
+        })),
     }),
     {
       name: 'camp-storage',
