@@ -29,6 +29,8 @@ export default function CreateCamp() {
   })
 
   const [imagePreview, setImagePreview] = useState<string>("")
+  const [promoVideo, setPromoVideo] = useState<string>("")
+  const [mediaGallery, setMediaGallery] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +61,68 @@ export default function CreateCamp() {
     }
   }
 
+  const handleMediaGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      const fileArray = Array.from(files)
+      
+      // Check if adding these files would exceed the limit (e.g., 10 files)
+      if (mediaGallery.length + fileArray.length > 10) {
+        alert("You can upload a maximum of 10 media files")
+        return
+      }
+
+      fileArray.forEach((file) => {
+        // Check file size (max 5MB per file)
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`${file.name} is too large. Maximum size is 5MB`)
+          return
+        }
+
+        // Check file type (images and videos)
+        if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+          alert(`${file.name} is not a valid media file. Please upload images or videos.`)
+          return
+        }
+
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const base64String = reader.result as string
+          setMediaGallery((prev) => [...prev, base64String])
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  const handlePromoVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Check file size (max 10MB for video)
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Video size should be less than 10MB")
+        return
+      }
+
+      // Check file type
+      if (!file.type.startsWith("video/")) {
+        alert("Please upload a video file")
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result as string
+        setPromoVideo(base64String)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeMediaItem = (index: number) => {
+    setMediaGallery((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -75,6 +139,8 @@ export default function CreateCamp() {
         imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=800",
         ageRange: formData.ageRange,
         capacity: parseInt(formData.capacity),
+        promoVideo: promoVideo || undefined,
+        mediaGallery: mediaGallery.length > 0 ? mediaGallery : undefined,
       })
 
       // Reset form
@@ -91,6 +157,8 @@ export default function CreateCamp() {
         capacity: "",
       })
       setImagePreview("")
+      setPromoVideo("")
+      setMediaGallery([])
 
       // Redirect to browse page
       router.push("/browse")
@@ -241,16 +309,16 @@ export default function CreateCamp() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="price" className="text-xl text-[#001220]">
-                    Price ($) *
+                    Price (Rwf) *
                   </Label>
                   <Input
                     id="price"
                     name="price"
                     type="number"
-                    step="0.01"
+                    step="1"
                     value={formData.price}
                     onChange={handleChange}
-                    placeholder="299.99"
+                    placeholder="300000"
                     required
                     className="text-lg"
                   />
@@ -348,6 +416,110 @@ export default function CreateCamp() {
                 <p className="text-sm text-gray-500">
                   Leave blank to use a default image
                 </p>
+              </div>
+
+              {/* Promotional Video Upload */}
+              <div className="space-y-2 border-t pt-6">
+                <Label htmlFor="promoVideo" className="text-xl text-[#001220]">
+                  📹 Promotional Video (Optional)
+                </Label>
+                <div className="space-y-4">
+                  <Input
+                    id="promoVideo"
+                    name="promoVideo"
+                    type="file"
+                    accept="video/*"
+                    onChange={handlePromoVideoUpload}
+                    className="text-lg cursor-pointer"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Upload a promotional video (max 10MB) to introduce your camp
+                  </p>
+                  
+                  {promoVideo && (
+                    <div className="relative group">
+                      <div className="relative h-60 w-full rounded-lg overflow-hidden border-2 border-[#ff0088]">
+                        <video
+                          src={promoVideo}
+                          className="w-full h-full object-cover"
+                          controls
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => setPromoVideo("")}
+                      >
+                        Remove Video
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Media Gallery Upload */}
+              <div className="space-y-2 border-t pt-6">
+                <Label htmlFor="mediaGallery" className="text-xl text-[#001220]">
+                  Additional Media Gallery (Optional)
+                </Label>
+                <div className="space-y-4">
+                  <Input
+                    id="mediaGallery"
+                    name="mediaGallery"
+                    type="file"
+                    accept="image/*,video/*"
+                    multiple
+                    onChange={handleMediaGalleryUpload}
+                    className="text-lg cursor-pointer"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Upload up to 10 images or videos (max 5MB each) to showcase your camp
+                  </p>
+                  
+                  {/* Media Gallery Preview */}
+                  {mediaGallery.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-base font-medium text-[#001220]">
+                        Gallery Preview ({mediaGallery.length}/10)
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {mediaGallery.map((media, index) => (
+                          <div key={index} className="relative group">
+                            <div className="relative h-40 w-full rounded-lg overflow-hidden border-2 border-[#ff0088]/50">
+                              {media.startsWith('data:video') ? (
+                                <video
+                                  src={media}
+                                  className="w-full h-full object-cover"
+                                  controls
+                                />
+                              ) : (
+                                <img
+                                  src={media}
+                                  alt={`Gallery item ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeMediaItem(index)}
+                            >
+                              ✕
+                            </Button>
+                            <div className="absolute bottom-2 left-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                              {index + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4">

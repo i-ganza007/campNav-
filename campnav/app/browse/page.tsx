@@ -15,6 +15,8 @@ export default function Browse() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [locationFilter, setLocationFilter] = useState("")
+  const [minPrice, setMinPrice] = useState<number>(0)
+  const [maxPrice, setMaxPrice] = useState<number>(10000000)
 
   const categories = [
     { value: "all", label: "All Camps" },
@@ -33,8 +35,10 @@ export default function Browse() {
       category: selectedCategory,
       location: locationFilter,
       searchTerm: searchTerm,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
     })
-  }, [searchTerm, selectedCategory, locationFilter, filterCamps])
+  }, [searchTerm, selectedCategory, locationFilter, minPrice, maxPrice, filterCamps])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -116,14 +120,58 @@ export default function Browse() {
               />
             </div>
 
+            {/* Price Range Filter */}
+            <div className="space-y-4">
+              <label className="text-lg font-medium text-[#001220]">Price Range</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-600">Min Price</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rwf</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      max={maxPrice}
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(Number(e.target.value))}
+                      className="text-lg pl-12"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-600">Max Price</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rwf</span>
+                    <Input
+                      type="number"
+                      min={minPrice}
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(Number(e.target.value))}
+                      className="text-lg pl-12"
+                      placeholder="10000000"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-base text-gray-600 bg-[#ff0088]/5 rounded-lg p-3">
+                <span>Filtering camps from</span>
+                <span className="font-semibold text-[#ff0088]">
+                  {minPrice.toLocaleString()} Rwf - {maxPrice.toLocaleString()} Rwf
+                </span>
+              </div>
+            </div>
+
             {/* Clear Filters */}
-            {(searchTerm || selectedCategory !== 'all' || locationFilter) && (
+            {(searchTerm || selectedCategory !== 'all' || locationFilter || minPrice > 0 || maxPrice < 10000000) && (
               <Button
                 variant="ghost"
                 onClick={() => {
                   setSearchTerm("")
                   setSelectedCategory("all")
                   setLocationFilter("")
+                  setMinPrice(0)
+                  setMaxPrice(10000000)
                 }}
                 className="text-lg"
               >
@@ -177,6 +225,12 @@ export default function Browse() {
                   <div className="absolute top-3 right-3 bg-[#ff0088] text-white px-3 py-1 rounded-full text-sm font-bold">
                     {camp.category}
                   </div>
+                  {camp.mediaGallery && camp.mediaGallery.length > 0 && (
+                    <div className="absolute bottom-3 left-3 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                      <span>📸</span>
+                      <span>{camp.mediaGallery.length} photos</span>
+                    </div>
+                  )}
                 </div>
 
                 <CardHeader>
@@ -211,7 +265,7 @@ export default function Browse() {
 
                 <CardFooter className="flex items-center justify-between border-t pt-4">
                   <div className="text-2xl font-bold text-[#ff0088]">
-                    ${camp.price.toFixed(2)}
+                    {camp.price.toLocaleString()} Rwf
                   </div>
                   <Link href={`/camp/${camp.id}`}>
                     <Button size="lg" className="text-lg">

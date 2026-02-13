@@ -1,5 +1,91 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+
+// Custom IndexedDB storage for handling large media files
+const indexedDBStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const request = indexedDB.open('camp-storage', 1)
+      
+      request.onerror = () => resolve(null)
+      
+      request.onsuccess = () => {
+        const db = request.result
+        if (!db.objectStoreNames.contains('camps')) {
+          resolve(null)
+          return
+        }
+        const transaction = db.transaction(['camps'], 'readonly')
+        const store = transaction.objectStore('camps')
+        const getRequest = store.get(name)
+        
+        getRequest.onsuccess = () => {
+          resolve(getRequest.result ? JSON.stringify(getRequest.result) : null)
+        }
+        getRequest.onerror = () => resolve(null)
+      }
+      
+      request.onupgradeneeded = (event: any) => {
+        const db = event.target.result
+        if (!db.objectStoreNames.contains('camps')) {
+          db.createObjectStore('camps')
+        }
+      }
+    })
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open('camp-storage', 1)
+      
+      request.onerror = () => reject(request.error)
+      
+      request.onsuccess = () => {
+        const db = request.result
+        const transaction = db.transaction(['camps'], 'readwrite')
+        const store = transaction.objectStore('camps')
+        const putRequest = store.put(JSON.parse(value), name)
+        
+        putRequest.onsuccess = () => resolve()
+        putRequest.onerror = () => reject(putRequest.error)
+      }
+      
+      request.onupgradeneeded = (event: any) => {
+        const db = event.target.result
+        if (!db.objectStoreNames.contains('camps')) {
+          db.createObjectStore('camps')
+        }
+      }
+    })
+  },
+  removeItem: async (name: string): Promise<void> => {
+    return new Promise<void>((resolve) => {
+      const request = indexedDB.open('camp-storage', 1)
+      
+      request.onerror = () => resolve()
+      
+      request.onsuccess = () => {
+        const db = request.result
+        if (!db.objectStoreNames.contains('camps')) {
+          resolve()
+          return
+        }
+        const transaction = db.transaction(['camps'], 'readwrite')
+        const store = transaction.objectStore('camps')
+        const deleteRequest = store.delete(name)
+        
+        deleteRequest.onsuccess = () => resolve()
+        deleteRequest.onerror = () => resolve()
+      }
+      
+      request.onupgradeneeded = (event: any) => {
+        const db = event.target.result
+        if (!db.objectStoreNames.contains('camps')) {
+          db.createObjectStore('camps')
+        }
+      }
+    })
+  },
+}
 
 export interface Camp {
   id: string
@@ -14,6 +100,8 @@ export interface Camp {
   ageRange: string
   capacity: number
   createdAt: string
+  promoVideo?: string  // Base64 string or URL for promotional/introduction video
+  mediaGallery?: string[]  // Array of base64 strings or URLs for additional media
 }
 
 interface CampStore {
@@ -86,6 +174,7 @@ export const useCampStore = create<CampStore>()(
     }),
     {
       name: 'camp-storage',
+      storage: createJSONStorage(() => indexedDBStorage),
     }
   )
 )
